@@ -41,9 +41,10 @@
 
 ## 如何订阅
 
-创建消息通道后就可以看到本通道的订阅二维码，将此二维码给需要订阅的用户关注即可
+创建消息通道后就可以看到本通道的订阅二维码，将此二维码给需要订阅的用户关注即可。
+
+这是我的博客订阅二维码，欢迎订阅～
 
 <p align="center">
 <img src="./showqrcode.jpeg" alt="push-wordpress-to-wechat" align="center" width="200px" />
-这是我的博客订阅二维码，欢迎订阅～
 </p>
