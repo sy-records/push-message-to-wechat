@@ -3,9 +3,9 @@
 
 Plugin Name: Push WordPress To WeChat (微信订阅)
 
-Plugin URI: https://qq52o.me
+Plugin URI: https://qq52o.me/2650.html
 
-Description: 将WordPress文章更新推送到微信。使用PushBear实现简单的微信订阅功能，增强博客活跃度。
+Description: 基于 PushBear服务提供 WordPress 内容更新微信订阅推送的插件
 
 Author: 沈唁
 
@@ -24,33 +24,58 @@ function PwtwSubmit()
     add_action('manage_posts_custom_column', 'pwtw_submit_render_post_columns', 10, 2);
 }
 
-
-
 function pwtw_submit($post_ID, $post)
 {
-
     if (isset($_POST['Pwtw_Submit_CHECK'])) {
-        // 获取选项
-        $option = get_option('PushWordPressToWeChat');
+
         $status = $_POST['pwtw_status'];
-        $pwtw_Submit = get_post_meta($post_ID, 'Pwtw_Submit', true);
+        $pwtw_submit = get_post_meta($post_ID, 'Pwtw_Submit', true);
 
         // 判断是否设置新增
-        if ($pwtw_Submit != 'OK') {
+        if ($pwtw_submit != 'OK') {
             if ($status == '1') {
                 update_post_meta($post_ID, 'Pwtw_Submit', 'first_submit');
             }
         }
 
         // 判断文章状态与推送状态 返回/继续
-        if($post->post_status != 'publish' || $pwtw_Submit == 'OK' ) {
+        if($post->post_status != 'publish' || $pwtw_submit == 'OK' ) {
             return;
         }
 
         // 执行
         if ($status) {
 
+            // 获取选项
+            $option = get_option('PushWordPressToWeChat');
 
+            $author_id =  get_post($post_ID)->post_author;
+            $author = get_user_meta($author_id, 'nickname', true);
+            $text = "{$author}居然更新文章啦。";
+            $title = get_the_title($post_ID); // 微信推送信息标题
+            $wx_post_link = get_permalink($post_ID).'?from=pushbear'; // 文章链接
+            $desp = "点击阅读吧~ [$title]($wx_post_link)";
+
+            $request = new WP_Http;
+            $api_url = 'https://pushbear.ftqq.com/sub';
+            $body = array(
+                'sendkey' => $option['SendKey'],
+                'text' => $text,
+                'desp' => $desp
+            );
+            $headers = 'Content-type: application/x-www-form-urlencoded';
+            $result = $request->post(
+                $api_url, array(
+                    'body' => $body,
+                    'headers' => $headers
+                )
+            );
+
+            if(!is_wp_error($result)) {
+                update_post_meta($post_ID, 'Pwtw_Submit', 'OK');
+            } else {
+                update_post_meta($post_ID, 'Pwtw_Submit', '-1');
+            }
         }
 
     }
@@ -75,7 +100,7 @@ function pwtw_submit_to_publish_metabox()
 {
     //获取选项
     $option = get_option('PushWordPressToWeChat');
-    if ($option['SendKey'] == '' || $option['Default'] == '') {
+    if ($option['SendKey'] == '') {
         return;
     }
     global $post_ID;
@@ -97,6 +122,22 @@ function pwtw_submit_to_publish_metabox()
     }
 
     echo '<div class="misc-pub-section misc-pub-post-status"><input name="Pwtw_Submit_CHECK" type="hidden" value="true">微信订阅：<span id="submit-span">'.$input.'</span></div>';
+}
+
+// 文章列表字段
+function pwtw_submit_add_post_columns($columns)
+{
+    $columns['Pwtw_Submit'] = '微信订阅推送';
+    return $columns;
+}
+
+function pwtw_submit_render_post_columns($column_name, $id)
+{
+    switch ($column_name) {
+    case 'Pwtw_Submit':
+        echo get_post_meta($id, 'Pwtw_Submit', true) == 'OK'  ? '推送成功' : (get_post_meta($id, 'Pwtw_Submit', true) == '-1' ? '推送失败' : '未推送');
+        break;
+    }
 }
 
 // init plugin
@@ -191,7 +232,7 @@ function pwtw_submit_options()
     echo '</form>';
     echo '<p><strong>使用提示</strong>：<br>
 	1.PushBear SendKey 通过 <a target="_blank" href="http://pushbear.ftqq.com/admin/#/">PushBear网站</a> > 创建消息通道后获取；<br>
-	2.其它相关问题至沈唁志博客 <a target="_blank" href="https://qq52o.me">Push WordPress To WeChat 插件</a> 页面查看使用说明和留言反馈。<br>
+	2.其它相关问题至沈唁志博客 <a target="_blank" href="https://qq52o.me/2650.html">Push WordPress To WeChat 插件</a> 页面查看使用说明和留言反馈。<br>
 	</p>';
     echo '</div>';
 }
