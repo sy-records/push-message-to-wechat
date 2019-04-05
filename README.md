@@ -24,7 +24,7 @@
 
 从`Github`下载源码，通过`WordPress`后台上传安装，或者直接将源码上传到`WordPress`插件目录`wp-content\plugins`，然后在后台启用
 
-2. `WordPress`后台搜索`Push WordPress To WeChat (微信订阅)`
+2. `WordPress`后台搜索`Push WordPress To WeChat`
 
 > 此方法暂时无法使用，正在提交至官方插件库
 

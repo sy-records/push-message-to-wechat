@@ -1,7 +1,7 @@
 <?php
 /*
 
-Plugin Name: Push WordPress To WeChat (微信订阅)
+Plugin Name: Push WordPress To WeChat
 
 Plugin URI: https://qq52o.me/2650.html
 
