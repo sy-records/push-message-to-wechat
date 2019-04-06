@@ -5,7 +5,7 @@ Plugin Name: Push WordPress To WeChat
 
 Plugin URI: https://qq52o.me/2650.html
 
-Description: 基于 PushBear服务提供 WordPress 内容更新微信订阅推送的插件
+Description: 基于 PushBear 服务提供 WordPress 内容更新微信订阅推送的插件
 
 Author: 沈唁
 
@@ -28,7 +28,7 @@ function pwtw_submit($post_ID, $post)
 {
     if (isset($_POST['Pwtw_Submit_CHECK'])) {
 
-        $status = $_POST['pwtw_status'];
+        $status = sanitize_key(intval($_POST['pwtw_status']));
         $pwtw_submit = get_post_meta($post_ID, 'Pwtw_Submit', true);
 
         // 判断是否设置新增
@@ -190,17 +190,29 @@ function pwtw_submit_options()
 {
     //保存数据
     if(isset($_POST['PwtwSubmit'])) {
-        $sendKey    = trim($_POST['SendKey']);
+
+        if(!current_user_can('level_10')){
+            echo '<div class="error" id="message"><p>暂无权限操作</p></div>';
+            return;
+        }
+
+        $nonce = $_REQUEST['_pwtw_nonce'];
+        if (!wp_verify_nonce($nonce, 'Pwtw_Submit')) {
+            echo '<div class="error" id="message"><p>非法操作</p></div>';
+            return;
+        }
+
+
         $pwtwOption= array(
-            'SendKey'    => $sendKey,
-            'Default'    => trim($_POST['Default']),
-            'Delete' => trim($_POST['Delete'])
+            'SendKey'    => sanitize_key($_POST['SendKey']),
+            'Default'    => sanitize_text_field($_POST['Default']),
+            'Delete' => sanitize_text_field($_POST['Delete'])
         );
         $res = update_option('PushWordPressToWeChat', $pwtwOption);//更新选项
         if($res) {
             $updated = '设置成功！';
         }else{
-            $updated = '设置失败！';
+            $updated = '设置失败或未更新选项！';
         }
         echo '<div class="updated" id="message"><p>'.$updated.'</p></div>';
     }
@@ -209,10 +221,14 @@ function pwtw_submit_options()
     $option = get_option('PushWordPressToWeChat');
     $default = $option['Default'] !== '' ? 'checked="checked"' : '';
     $delete = $option['Delete'] !== '' ? 'checked="checked"' : '';
+
     echo '<div class="wrap">';
     echo '<h2>Push WordPress To WeChat 微信订阅设置</h2>';
     echo '<form method="post">';
     echo '<table class="form-table">';
+    echo '<tr valign="top">';
+    echo '<td><input class="all-options" type="hidden" name="_pwtw_nonce" value="'.wp_create_nonce('Pwtw_Submit').'"></td>';
+    echo '</tr>';
     echo '<tr valign="top">';
     echo '<th scope="row">PushBear SendKey</th>';
     echo '<td><input class="all-options" type="text" name="SendKey" value="'.$option['SendKey'].'" /></td>';
