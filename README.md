@@ -50,3 +50,9 @@
 <p align="center">
 <img src="./showqrcode.jpeg" alt="push-wordpress-to-wechat" align="center" width="200px" />
 </p>
+
+## Todo
+
+* [x] 可填写配置信息，选择是否默认推送
+* [ ] 可自定义推送标题
+* [ ] 可自定义推送内容
