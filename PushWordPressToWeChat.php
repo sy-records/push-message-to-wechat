@@ -107,7 +107,7 @@ function pwtw_submit_to_publish_metabox()
 
     // 获取选项
     $pwtw_submit = get_post_meta($post_ID, 'Pwtw_Submit', true);
-    $checked = $option['Default'] == 'true' ? 'checked="checked"' : '';
+    $checked = $option['Default'] == true ? 'checked="checked"' : '';
 
     $pwtw_box = '<label><input name="pwtw_status" type="checkbox" value="1" '.$checked.'>推送</label>';
 
@@ -206,11 +206,11 @@ function pwtw_submit_options()
 
 
         $pwtwOption= array(
-            'SendKey'    => sanitize_key($_POST['SendKey']),
-            'Default'    => sanitize_text_field($_POST['Default']),
-            'Delete' => sanitize_text_field($_POST['Delete']),
-            'Title'     => '',
-            'Content'     => '',
+            'SendKey' => sanitize_key($_POST['SendKey']),
+            'Default' => isset($_POST['Default']) ? $_POST['Default'] : false,
+            'Delete' => isset($_POST['Delete']) ? $_POST['Delete'] : false,
+            'Title' => trim($_POST['Title']),
+            'Content' => trim($_POST['Content']),
         );
 
         $res = update_option('PushWordPressToWeChat', $pwtwOption);//更新选项
@@ -224,8 +224,8 @@ function pwtw_submit_options()
 
     // //获取选项
     $option = get_option('PushWordPressToWeChat');
-    $default = $option['Default'] !== '' ? 'checked="checked"' : '';
-    $delete = $option['Delete'] !== '' ? 'checked="checked"' : '';
+    $default = $option['Default'] !== false ? 'checked="checked"' : '';
+    $delete = $option['Delete'] !== false ? 'checked="checked"' : '';
 
     echo '<div class="wrap">';
     echo '<h2>Push WordPress To WeChat 微信订阅设置</h2>';
