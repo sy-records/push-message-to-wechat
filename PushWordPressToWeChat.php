@@ -152,6 +152,8 @@ function pwtw_submit_default_options()
             'SendKey'    => '',
             'Default'    => '',
             'Delete'     => '',
+            'Title'     => '',
+            'Content'     => '',
         );
         //更新选项
         update_option('PushWordPressToWeChat', $default);
@@ -206,8 +208,11 @@ function pwtw_submit_options()
         $pwtwOption= array(
             'SendKey'    => sanitize_key($_POST['SendKey']),
             'Default'    => sanitize_text_field($_POST['Default']),
-            'Delete' => sanitize_text_field($_POST['Delete'])
+            'Delete' => sanitize_text_field($_POST['Delete']),
+            'Title'     => '',
+            'Content'     => '',
         );
+
         $res = update_option('PushWordPressToWeChat', $pwtwOption);//更新选项
         if($res) {
             $updated = '设置成功！';
@@ -232,6 +237,14 @@ function pwtw_submit_options()
     echo '<tr valign="top">';
     echo '<th scope="row">PushBear SendKey</th>';
     echo '<td><input class="all-options" type="text" name="SendKey" value="'.$option['SendKey'].'" /></td>';
+    echo '</tr>';
+    echo '<tr valign="top">';
+    echo '<th scope="row">推送标题</th>';
+    echo '<td><input class="all-options" type="text" name="Title" value="'.$option['Title'].'" /></td>';
+    echo '</tr>';
+    echo '<tr valign="top">';
+    echo '<th scope="row">推送内容</th>';
+    echo '<td><input class="all-options" type="text" name="Content" value="'.$option['Content'].'" /></td>';
     echo '</tr>';
     echo '<tr valign="top">';
     echo '<th scope="row">是否默认推送</th>';
