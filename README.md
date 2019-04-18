@@ -2,7 +2,7 @@
 
 <p align="center">
 基于 PushBear 服务提供 WordPress 内容更新微信订阅推送的插件
-<img src="./push-wordpress-to-wechat.png" alt="push-wordpress-to-wechat" align="center" />
+<img src="images/push-wordpress-to-wechat.png" alt="push-wordpress-to-wechat" align="center" />
 </p>
 
 
@@ -39,7 +39,7 @@
 
 进入插件设置页面后，填入`PushBear`创建消息通道后的`SendKey`，自行选择勾选其他参数
 
-![push-wordpress-to-wechat插件截图](./screenshot-1.png)
+![push-wordpress-to-wechat插件截图](images/screenshot-1.png)
 
 ## 如何订阅
 
@@ -48,7 +48,7 @@
 这是我的博客订阅二维码，欢迎订阅～
 
 <p align="center">
-<img src="./showqrcode.jpeg" alt="push-wordpress-to-wechat" align="center" width="200px" />
+<img src="images/showqrcode.jpeg" alt="push-wordpress-to-wechat" align="center" width="200px" />
 </p>
 
 ## Todo
