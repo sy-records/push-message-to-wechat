@@ -9,7 +9,7 @@ Description: 基于 PushBear 服务提供 WordPress 内容更新微信订阅推�
 
 Author: 沈唁
 
-Version: 1.0.0
+Version: 1.1.0
 
 Author URI: https://qq52o.me
 
@@ -22,6 +22,15 @@ function PwtwSubmit()
     add_action('save_post', 'pwtw_submit', 10, 2);
     add_filter('manage_post_posts_columns', 'pwtw_submit_add_post_columns');
     add_action('manage_posts_custom_column', 'pwtw_submit_render_post_columns', 10, 2);
+}
+
+function getDefinition($definition, $str)
+{
+    if(strpos($str,$definition) !== false){
+        return true;
+    }else{
+        return false;
+    }
 }
 
 function pwtw_submit($post_ID, $post)
@@ -51,10 +60,58 @@ function pwtw_submit($post_ID, $post)
 
             $author_id =  get_post($post_ID)->post_author;
             $author = get_user_meta($author_id, 'nickname', true);
-            $text = "{$author}居然更新文章啦。";
             $title = get_the_title($post_ID); // 微信推送信息标题
             $wx_post_link = get_permalink($post_ID).'?from=pushbear'; // 文章链接
-            $desp = "点击阅读吧~ [$title]($wx_post_link)";
+
+            // {username} 作者名称 {title} 文章标题 {url} 文章链接
+            $definition = ["{username}", "{title}", "{url}", "<br>"];
+            if (empty($option['Title'])) {
+                $text = "{$author}居然更新文章啦。";
+            } else { // 用户自定义标题
+                $text = $option['Title'];
+                foreach ($definition as $key => $item) {
+                    $de_status = getDefinition($item, $text);
+                    if ($de_status) {
+                        switch ($item) {
+                            case "{username}":
+                                $text = str_replace("{username}", $author, $text);
+                                break;
+                            case "{title}":
+                                $text = str_replace("{title}", $title, $text);
+                                break;
+                            case "{url}":
+                                $text = str_replace("{url}", $wx_post_link, $text);
+                                break;
+                        }
+                    }
+                }
+            }
+
+            if (empty($option['Content'])) {
+                $desp = "点击阅读吧~ [$title]($wx_post_link)";
+            } else { // 用户自定义内容
+                $desp = $option['Content'];
+                foreach ($definition as $key => $item) {
+                    $de_status = getDefinition($item, $desp);
+                    if ($de_status) {
+                        switch ($item) {
+                            case "{username}":
+                                $desp = str_replace("{username}", $author, $desp);
+                                break;
+                            case "{title}":
+                                $desp = str_replace("{title}", $title, $desp);
+                                break;
+                            case "{url}":
+                                $desp = str_replace("{url}", $wx_post_link, $desp);
+                                break;
+                            case "<br>":
+                                $desp = str_replace("<br>", "\n", $desp);
+                                break;
+                        }
+                    }
+                }
+            }
+
 
             $request = new WP_Http;
             $api_url = 'https://pushbear.ftqq.com/sub';
@@ -149,11 +206,11 @@ function pwtw_submit_default_options()
     if($default == '' ) {
         // 设置默认数据
         $default = array(
-            'SendKey'    => '',
-            'Default'    => '',
-            'Delete'     => '',
-            'Title'     => '',
-            'Content'     => '',
+            'SendKey' => '',
+            'Default' => '',
+            'Delete' => '',
+            'Title' => '',
+            'Content' => '',
         );
         //更新选项
         update_option('PushWordPressToWeChat', $default);
@@ -169,10 +226,10 @@ function pwtw_submit_add_links( $actions, $plugin_file )
         $plugin = plugin_basename(__FILE__);
     }
     if ($plugin == $plugin_file) {
-        $settings    = array('settings' => '<a href="options-general.php?page=Push_To_WeChat">' . __('Settings') . '</a>');
-        $site_link    = array('support' => '<a href="https://qq52o.me" target="_blank">沈唁志</a>');
-        $actions     = array_merge($settings, $actions);
-        $actions    = array_merge($site_link, $actions);
+        $settings = array('settings' => '<a href="options-general.php?page=Push_To_WeChat">' . __('Settings') . '</a>');
+        $site_link = array('support' => '<a href="https://qq52o.me" target="_blank">沈唁志</a>');
+        $actions = array_merge($settings, $actions);
+        $actions = array_merge($site_link, $actions);
     }
     return $actions;
 }
@@ -193,7 +250,7 @@ function pwtw_submit_options()
     //保存数据
     if(isset($_POST['PwtwSubmit'])) {
 
-        if(!current_user_can('level_10')){
+        if(!current_user_can('level_10')) {
             echo '<div class="error" id="message"><p>暂无权限操作</p></div>';
             return;
         }
@@ -209,8 +266,8 @@ function pwtw_submit_options()
             'SendKey' => sanitize_key($_POST['SendKey']),
             'Default' => isset($_POST['Default']) ? $_POST['Default'] : false,
             'Delete' => isset($_POST['Delete']) ? $_POST['Delete'] : false,
-            'Title' => trim($_POST['Title']),
-            'Content' => trim($_POST['Content']),
+            'Title' => $_POST['Title'],
+            'Content' => stripslashes(trim($_POST['Content'])),
         );
 
         $res = update_option('PushWordPressToWeChat', $pwtwOption);//更新选项
@@ -244,7 +301,7 @@ function pwtw_submit_options()
     echo '</tr>';
     echo '<tr valign="top">';
     echo '<th scope="row">推送内容</th>';
-    echo '<td><input class="all-options" type="text" name="Content" value="'.$option['Content'].'" /></td>';
+    echo '<td><textarea  class="all-options"  name="Content" rows="10">'.$option['Content'].'</textarea><p class="description"><p class="description" >预定义变量: {username}作者名称; {title}文章标题; {url}文章链接; 回车为2个&lt;br&gt;或1次Enter</p></td>';
     echo '</tr>';
     echo '<tr valign="top">';
     echo '<th scope="row">是否默认推送</th>';
@@ -261,7 +318,8 @@ function pwtw_submit_options()
     echo '</form>';
     echo '<p><strong>使用提示</strong>：<br>
 	1.PushBear SendKey 通过 <a target="_blank" href="http://pushbear.ftqq.com/admin/#/">PushBear网站</a> > 创建消息通道后获取；<br>
-	2.其它相关问题至沈唁志博客 <a target="_blank" href="https://qq52o.me/2650.html">Push WordPress To WeChat 插件</a> 页面查看使用说明和留言反馈。<br>
+	2.标题不超过 80 个字；内容支持 Emoji 表情，支持 Markdown 语法；<br>
+	3.其它相关问题至沈唁志博客 <a target="_blank" href="https://qq52o.me/2650.html">Push WordPress To WeChat 插件</a> 页面查看使用说明和留言反馈。<br>
 	</p>';
     echo '</div>';
 }
