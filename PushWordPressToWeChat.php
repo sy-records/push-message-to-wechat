@@ -9,7 +9,7 @@ Description: 基于 PushBear 服务提供 WordPress 内容更新微信订阅推�
 
 Author: 沈唁
 
-Version: 1.1.0
+Version: 1.2.0
 
 Author URI: https://qq52o.me
 
@@ -37,19 +37,19 @@ function pwtw_submit($post_ID, $post)
 {
     if (isset($_POST['Pwtw_Submit_CHECK'])) {
 
-        $status = sanitize_key(intval($_POST['pwtw_status']));
-        $pwtw_submit = get_post_meta($post_ID, 'Pwtw_Submit', true);
-
-        // 判断是否设置新增
-        if ($pwtw_submit != 'OK') {
-            if ($status == '1') {
-                update_post_meta($post_ID, 'Pwtw_Submit', 'first_submit');
-            }
+        // 判断文章状态
+        if($post->post_status != 'publish') {
+            return;
         }
 
-        // 判断文章状态与推送状态 返回/继续
-        if($post->post_status != 'publish' || $pwtw_submit == 'OK' ) {
-            return;
+        $pwtw_submit = get_post_meta($post_ID, 'Pwtw_Submit', true);
+        $status = sanitize_key(intval($_POST['pwtw_status']));
+
+        // 判断是否设置新增 首次推送 || 推送失败
+        if (empty($pwtw_submit) || $pwtw_submit == '-1' || $pwtw_submit == 'OK') {
+            if (!empty($status)) {
+                update_post_meta($post_ID, 'Pwtw_Submit', 'first_submit');
+            }
         }
 
         // 执行
@@ -58,13 +58,29 @@ function pwtw_submit($post_ID, $post)
             // 获取选项
             $option = get_option('PushWordPressToWeChat');
 
-            $author_id =  get_post($post_ID)->post_author;
+            $author_id =  $post->post_author;
             $author = get_user_meta($author_id, 'nickname', true);
+
+            // 文章摘要
+            if ($post->post_excerpt) {
+                $excerpt = $post->post_excerpt;
+            } else {
+                if (preg_match('/<p>(.*)<\/p>/iU', trim(strip_tags($post->post_content, "<p>")), $result)) {
+                    $post_content = $result['1'];
+                } else {
+                    $post_content_r = explode("\n", trim(strip_tags($post->post_content)));
+                    $post_content = $post_content_r['0'];
+                }
+                $excerpt = preg_replace('#^(?:[\x00-\x7F]|[\xC0-\xFF][\x80-\xBF]+){0,0}' . '((?:[\x00-\x7F]|[\xC0-\xFF][\x80-\xBF]+){0,150}).*#s', '$1', $post_content);
+            }
+            $excerpt = str_replace(array("\r\n", "\r", "\n"), "", $excerpt);
+
             $title = get_the_title($post_ID); // 微信推送信息标题
             $wx_post_link = get_permalink($post_ID).'?from=pushbear'; // 文章链接
 
-            // {username} 作者名称 {title} 文章标题 {url} 文章链接
-            $definition = ["{username}", "{title}", "{url}", "<br>"];
+            // {username} 作者名称 {title} 文章标题 {url} 文章链接 {excerpt} 文章摘要
+            $definition = ["{username}", "{title}", "{url}", "<br>", "{excerpt}"];
+
             if (empty($option['Title'])) {
                 $text = "{$author}居然更新文章啦。";
             } else { // 用户自定义标题
@@ -81,6 +97,9 @@ function pwtw_submit($post_ID, $post)
                                 break;
                             case "{url}":
                                 $text = str_replace("{url}", $wx_post_link, $text);
+                                break;
+                            case "{excerpt}":
+                                $text = str_replace("{excerpt}", $excerpt, $text);
                                 break;
                         }
                     }
@@ -107,6 +126,9 @@ function pwtw_submit($post_ID, $post)
                             case "<br>":
                                 $desp = str_replace("<br>", "\n", $desp);
                                 break;
+                            case "{excerpt}":
+                                $desp = str_replace("{excerpt}", $excerpt, $desp);
+                                break;
                         }
                     }
                 }
@@ -129,7 +151,12 @@ function pwtw_submit($post_ID, $post)
             );
 
             if(!is_wp_error($result)) {
-                update_post_meta($post_ID, 'Pwtw_Submit', 'OK');
+                $pwtw_post_submit = get_post_meta($post_ID, 'Pwtw_Submit', true);
+                if ($pwtw_post_submit == 'first_submit') {
+                    update_post_meta($post_ID, 'Pwtw_Submit', 1);
+                } else {
+                    update_post_meta($post_ID, 'Pwtw_Submit', $pwtw_post_submit + 1);
+                }
             } else {
                 update_post_meta($post_ID, 'Pwtw_Submit', '-1');
             }
@@ -144,7 +171,6 @@ add_action('admin_menu', 'pwtw_submit_menu');
 function pwtw_submit_menu()
 {
     add_submenu_page('options-general.php', '微信订阅设置', 'Push To WeChat', 'manage_options', 'Push_To_WeChat', 'pwtw_submit_options', '');
-
 }
 
 add_action('admin_menu', 'pwtw_submit_create');
@@ -166,34 +192,44 @@ function pwtw_submit_to_publish_metabox()
     $pwtw_submit = get_post_meta($post_ID, 'Pwtw_Submit', true);
     $checked = $option['Default'] == true ? 'checked="checked"' : '';
 
-    $pwtw_box = '<label><input name="pwtw_status" type="checkbox" value="1" '.$checked.'>推送</label>';
-
-    if ($pwtw_submit == 'OK') {
-        $input = '
-			<label for="Pwtw_Submit" class="selectit">成功</label>
-		';
+    if ($pwtw_submit == '-1') {
+        $status = '失败，请重试';
+    } elseif (empty($pwtw_submit)) {
+        $status = '';
     } else {
-        $input = '
-			<label for="Pwtw_Submit" class="selectit">'.$pwtw_box.'</label>
-		';
+        $pwtw_submit += 1;
+        $status = "第[$pwtw_submit]次";
     }
 
-    echo '<div class="misc-pub-section misc-pub-post-status"><input name="Pwtw_Submit_CHECK" type="hidden" value="true">微信订阅：<span id="submit-span">'.$input.'</span></div>';
+    $input = '<label for="Pwtw_Submit" class="selectit"><input name="pwtw_status" type="checkbox" value="1" '.$checked.'>推送'. $status .'</label>';
+
+    echo '<div class="misc-pub-section dashicons-before dashicons-heart"><input name="Pwtw_Submit_CHECK" type="hidden" value="true"> 微信订阅：<span id="submit-span">'.$input.'</span></div>';
 }
 
 // 文章列表字段
 function pwtw_submit_add_post_columns($columns)
 {
-    $columns['Pwtw_Submit'] = '微信订阅推送';
+    $columns['Pwtw_Submit'] = '微信订阅';
     return $columns;
 }
 
 function pwtw_submit_render_post_columns($column_name, $id)
 {
     switch ($column_name) {
-    case 'Pwtw_Submit':
-        echo get_post_meta($id, 'Pwtw_Submit', true) == 'OK'  ? '推送成功' : (get_post_meta($id, 'Pwtw_Submit', true) == '-1' ? '推送失败' : '未推送');
-        break;
+        case 'Pwtw_Submit':
+            $status = get_post_meta($id, 'Pwtw_Submit', true);
+            // 兼容前两版本
+            if ($status == 'OK') {
+                $text = "已推送1次";
+            } elseif ($status == '-1') {
+                $text = "推送失败";
+            } elseif (!empty($status)) {
+                $text = "已推送{$status}次";
+            } else {
+                $text = "未推送";
+            }
+            echo $text;
+            break;
     }
 }
 
@@ -301,7 +337,7 @@ function pwtw_submit_options()
     echo '</tr>';
     echo '<tr valign="top">';
     echo '<th scope="row">推送内容</th>';
-    echo '<td><textarea  class="all-options"  name="Content" rows="10">'.$option['Content'].'</textarea><p class="description"><p class="description" >预定义变量: {username}作者名称; {title}文章标题; {url}文章链接; 回车为2个&lt;br&gt;或1次Enter</p></td>';
+    echo '<td><textarea  class="all-options"  name="Content" rows="10">'.$option['Content'].'</textarea><p class="description"><p class="description" >预定义变量: {username}作者名称; {title}文章标题; {url}文章链接; 回车为2个&lt;br&gt;或1次Enter; {excerpt}文章摘要</p></td>';
     echo '</tr>';
     echo '<tr valign="top">';
     echo '<th scope="row">是否默认推送</th>';
