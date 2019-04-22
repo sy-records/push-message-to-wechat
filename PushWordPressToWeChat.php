@@ -197,8 +197,12 @@ function pwtw_submit_to_publish_metabox()
     } elseif (empty($pwtw_submit)) {
         $status = '';
     } else {
-        $pwtw_submit += 1;
-        $status = "第[$pwtw_submit]次";
+        if (is_numeric($pwtw_submit)) {
+            $pwtw_submit += 1;
+            $status = "第[$pwtw_submit]次";
+        } else {
+            $status = '';
+        }
     }
 
     $input = '<label for="Pwtw_Submit" class="selectit"><input name="pwtw_status" type="checkbox" value="1" '.$checked.'>推送'. $status .'</label>';
