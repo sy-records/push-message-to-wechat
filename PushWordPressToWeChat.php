@@ -9,7 +9,7 @@ Description: 基于 PushBear 服务提供 WordPress 内容更新微信订阅推�
 
 Author: 沈唁
 
-Version: 1.2.0
+Version: 1.2.1
 
 Author URI: https://qq52o.me
 
@@ -26,7 +26,7 @@ function PwtwSubmit()
 
 function getDefinition($definition, $str)
 {
-    if(strpos($str,$definition) !== false){
+    if(strpos($str, $definition) !== false) {
         return true;
     }else{
         return false;
@@ -89,18 +89,18 @@ function pwtw_submit($post_ID, $post)
                     $de_status = getDefinition($item, $text);
                     if ($de_status) {
                         switch ($item) {
-                            case "{username}":
-                                $text = str_replace("{username}", $author, $text);
-                                break;
-                            case "{title}":
-                                $text = str_replace("{title}", $title, $text);
-                                break;
-                            case "{url}":
-                                $text = str_replace("{url}", $wx_post_link, $text);
-                                break;
-                            case "{excerpt}":
-                                $text = str_replace("{excerpt}", $excerpt, $text);
-                                break;
+                        case "{username}":
+                            $text = str_replace("{username}", $author, $text);
+                            break;
+                        case "{title}":
+                            $text = str_replace("{title}", $title, $text);
+                            break;
+                        case "{url}":
+                            $text = str_replace("{url}", $wx_post_link, $text);
+                            break;
+                        case "{excerpt}":
+                            $text = str_replace("{excerpt}", $excerpt, $text);
+                            break;
                         }
                     }
                 }
@@ -114,26 +114,25 @@ function pwtw_submit($post_ID, $post)
                     $de_status = getDefinition($item, $desp);
                     if ($de_status) {
                         switch ($item) {
-                            case "{username}":
-                                $desp = str_replace("{username}", $author, $desp);
-                                break;
-                            case "{title}":
-                                $desp = str_replace("{title}", $title, $desp);
-                                break;
-                            case "{url}":
-                                $desp = str_replace("{url}", $wx_post_link, $desp);
-                                break;
-                            case "<br>":
-                                $desp = str_replace("<br>", "\n", $desp);
-                                break;
-                            case "{excerpt}":
-                                $desp = str_replace("{excerpt}", $excerpt, $desp);
-                                break;
+                        case "{username}":
+                            $desp = str_replace("{username}", $author, $desp);
+                            break;
+                        case "{title}":
+                            $desp = str_replace("{title}", $title, $desp);
+                            break;
+                        case "{url}":
+                            $desp = str_replace("{url}", $wx_post_link, $desp);
+                            break;
+                        case "<br>":
+                            $desp = str_replace("<br>", "\n", $desp);
+                            break;
+                        case "{excerpt}":
+                            $desp = str_replace("{excerpt}", $excerpt, $desp);
+                            break;
                         }
                     }
                 }
             }
-
 
             $request = new WP_Http;
             $api_url = 'https://pushbear.ftqq.com/sub';
@@ -151,19 +150,45 @@ function pwtw_submit($post_ID, $post)
             );
 
             if(!is_wp_error($result)) {
-                $pwtw_post_submit = get_post_meta($post_ID, 'Pwtw_Submit', true);
-                if ($pwtw_post_submit == 'first_submit') {
-                    update_post_meta($post_ID, 'Pwtw_Submit', 1);
+                $res = json_decode($result['body'], true);
+                if ($res['code'] == 0) {
+                    $pwtw_post_submit = get_post_meta($post_ID, 'Pwtw_Submit', true);
+                    if ($pwtw_post_submit == 'first_submit') {
+                        update_post_meta($post_ID, 'Pwtw_Submit', 1);
+                    } else {
+                        update_post_meta($post_ID, 'Pwtw_Submit', $pwtw_post_submit + 1);
+                    }
+
+                    set_transient("pwtw_pushbear_status", "true");
                 } else {
-                    update_post_meta($post_ID, 'Pwtw_Submit', $pwtw_post_submit + 1);
+                    set_transient("pwtw_pushbear_status", $res['message']);
                 }
             } else {
                 update_post_meta($post_ID, 'Pwtw_Submit', '-1');
+
+                set_transient("pwtw_pushbear_status", "false");
             }
         }
 
     }
 
+}
+
+add_action('admin_notices', 'pwtw_pushbear_status_notices');
+function pwtw_pushbear_status_notices()
+{
+    $status = get_transient("pwtw_pushbear_status");
+    if (!empty($status)) {
+        if ($status == "true" ) {
+            echo '<div class="notice notice-success is-dismissible"><p>微信订阅推送成功～</p></div>';
+        } elseif ($status == "false" ) {
+            echo '<div class="notice notice-error is-dismissible"><p>微信订阅推送失败，原因：'. $status .'</p></div>';
+        } else {
+            echo '<div class="notice notice-error is-dismissible"><p>微信订阅推送失败，原因： WordPress Error</p></div>';
+        }
+
+        delete_transient("pwtw_pushbear_status");
+    }
 }
 
 // setting plugin
@@ -220,20 +245,20 @@ function pwtw_submit_add_post_columns($columns)
 function pwtw_submit_render_post_columns($column_name, $id)
 {
     switch ($column_name) {
-        case 'Pwtw_Submit':
-            $status = get_post_meta($id, 'Pwtw_Submit', true);
-            // 兼容前两版本
-            if ($status == 'OK') {
-                $text = "已推送1次";
-            } elseif ($status == '-1') {
-                $text = "推送失败";
-            } elseif (!empty($status)) {
-                $text = "已推送{$status}次";
-            } else {
-                $text = "未推送";
-            }
-            echo $text;
-            break;
+    case 'Pwtw_Submit':
+        $status = get_post_meta($id, 'Pwtw_Submit', true);
+        // 兼容前两版本
+        if ($status == 'OK') {
+            $text = "已推送1次";
+        } elseif ($status == '-1') {
+            $text = "推送失败";
+        } elseif (!empty($status)) {
+            $text = "已推送{$status}次";
+        } else {
+            $text = "未推送";
+        }
+        echo $text;
+        break;
     }
 }
 
