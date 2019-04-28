@@ -80,9 +80,10 @@ function pwtw_submit($post_ID, $post)
                             case "{title}":
                                 $text = str_replace("{title}", $title, $text);
                                 break;
-                            case "{url}":
-                                $text = str_replace("{url}", $wx_post_link, $text);
-                                break;
+//                            case "{url}":
+                                // 标题要链接好像没什么用？
+//                                $text = str_replace("{url}", $wx_post_link, $text);
+//                                break;
                         }
                     }
                 }
