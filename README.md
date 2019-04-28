@@ -39,7 +39,7 @@
 
 进入插件设置页面后，填入`PushBear`创建消息通道后的`SendKey`，自行选择勾选其他参数
 
-![push-wordpress-to-wechat插件截图](images/pwtw-v1.1.0.png)
+![push-wordpress-to-wechat插件截图](images/pwtw-v1.2.2.png)
 
 ## 如何订阅
 
