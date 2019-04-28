@@ -9,7 +9,7 @@ Description: 基于 PushBear 服务提供 WordPress 内容更新微信订阅推�
 
 Author: 沈唁
 
-Version: 1.2.1
+Version: 1.2.2
 
 Author URI: https://qq52o.me
 
@@ -60,26 +60,11 @@ function pwtw_submit($post_ID, $post)
 
             $author_id =  $post->post_author;
             $author = get_user_meta($author_id, 'nickname', true);
-
-            // 文章摘要
-            if ($post->post_excerpt) {
-                $excerpt = $post->post_excerpt;
-            } else {
-                if (preg_match('/<p>(.*)<\/p>/iU', trim(strip_tags($post->post_content, "<p>")), $result)) {
-                    $post_content = $result['1'];
-                } else {
-                    $post_content_r = explode("\n", trim(strip_tags($post->post_content)));
-                    $post_content = $post_content_r['0'];
-                }
-                $excerpt = preg_replace('#^(?:[\x00-\x7F]|[\xC0-\xFF][\x80-\xBF]+){0,0}' . '((?:[\x00-\x7F]|[\xC0-\xFF][\x80-\xBF]+){0,150}).*#s', '$1', $post_content);
-            }
-            $excerpt = str_replace(array("\r\n", "\r", "\n"), "", $excerpt);
-
             $title = get_the_title($post_ID); // 微信推送信息标题
             $wx_post_link = get_permalink($post_ID).'?from=pushbear'; // 文章链接
 
-            // {username} 作者名称 {title} 文章标题 {url} 文章链接 {excerpt} 文章摘要
-            $definition = ["{username}", "{title}", "{url}", "<br>", "{excerpt}"];
+            // {username} 作者名称 {title} 文章标题 {url} 文章链接 {excerpt} 文章摘要 {img} 图片
+            $definition = ["{username}", "{title}", "{url}", "<br>", "{excerpt}", "{img}"];
 
             if (empty($option['Title'])) {
                 $text = "{$author}居然更新文章啦。";
@@ -89,18 +74,15 @@ function pwtw_submit($post_ID, $post)
                     $de_status = getDefinition($item, $text);
                     if ($de_status) {
                         switch ($item) {
-                        case "{username}":
-                            $text = str_replace("{username}", $author, $text);
-                            break;
-                        case "{title}":
-                            $text = str_replace("{title}", $title, $text);
-                            break;
-                        case "{url}":
-                            $text = str_replace("{url}", $wx_post_link, $text);
-                            break;
-                        case "{excerpt}":
-                            $text = str_replace("{excerpt}", $excerpt, $text);
-                            break;
+                            case "{username}":
+                                $text = str_replace("{username}", $author, $text);
+                                break;
+                            case "{title}":
+                                $text = str_replace("{title}", $title, $text);
+                                break;
+                            case "{url}":
+                                $text = str_replace("{url}", $wx_post_link, $text);
+                                break;
                         }
                     }
                 }
@@ -114,21 +96,24 @@ function pwtw_submit($post_ID, $post)
                     $de_status = getDefinition($item, $desp);
                     if ($de_status) {
                         switch ($item) {
-                        case "{username}":
-                            $desp = str_replace("{username}", $author, $desp);
-                            break;
-                        case "{title}":
-                            $desp = str_replace("{title}", $title, $desp);
-                            break;
-                        case "{url}":
-                            $desp = str_replace("{url}", $wx_post_link, $desp);
-                            break;
-                        case "<br>":
-                            $desp = str_replace("<br>", "\n", $desp);
-                            break;
-                        case "{excerpt}":
-                            $desp = str_replace("{excerpt}", $excerpt, $desp);
-                            break;
+                            case "{username}":
+                                $desp = str_replace("{username}", $author, $desp);
+                                break;
+                            case "{title}":
+                                $desp = str_replace("{title}", $title, $desp);
+                                break;
+                            case "{url}":
+                                $desp = str_replace("{url}", $wx_post_link, $desp);
+                                break;
+                            case "<br>":
+                                $desp = str_replace("<br>", "\n", $desp);
+                                break;
+                            case "{excerpt}":
+                                $desp = str_replace("{excerpt}", pwtw_get_post_excerpt($post), $desp);
+                                break;
+                            case "{img}":
+                                $desp = str_replace("{img}", pwtw_get_post_first_img($post), $desp);
+                                break;
                         }
                     }
                 }
@@ -189,6 +174,47 @@ function pwtw_pushbear_status_notices()
 
         delete_transient("pwtw_pushbear_status");
     }
+}
+
+function pwtw_get_post_excerpt($post)
+{
+    if ($post->post_excerpt) {
+        $excerpt = $post->post_excerpt;
+    } else {
+        if (preg_match('/<p>(.*)<\/p>/iU', trim(strip_tags($post->post_content, "<p>")), $result)) {
+            $post_content = $result['1'];
+        } else {
+            $post_content_r = explode("\n", trim(strip_tags($post->post_content)));
+            $post_content = $post_content_r['0'];
+        }
+        $excerpt = preg_replace('#^(?:[\x00-\x7F]|[\xC0-\xFF][\x80-\xBF]+){0,0}' . '((?:[\x00-\x7F]|[\xC0-\xFF][\x80-\xBF]+){0,150}).*#s', '$1', $post_content);
+    }
+    $excerpt = str_replace(array("\r\n", "\r", "\n"), "", $excerpt);
+    return $excerpt;
+}
+
+function pwtw_get_post_first_img($post)
+{
+    // 特色图片 优先获取特色缩略图，否则获取文章首图 其他需要手动增加主题相关方法
+
+    if (has_post_thumbnail()) {
+        //如果有特色缩略图，则输出缩略图地址
+        $thumbnail_src = wp_get_attachment_image_src(get_post_thumbnail_id($post->ID), 'full');
+        $src = $thumbnail_src[0];
+    } else {
+        preg_match_all('/<img .*?src=[\"|\'](.+?)[\"|\'].*?>/', $post->post_content, $strResult, PREG_PATTERN_ORDER);
+        $n = count($strResult[1]);
+        if ($n > 0) { // 提取首图
+            $src = $strResult[1][0];
+        }
+    }
+
+//    手动增加主题相关方法
+//    if (empty($src)) {
+//        $src = 替换为主题对应的获取特色图片的方法;
+//    }
+
+    return $src;
 }
 
 // setting plugin
@@ -366,7 +392,7 @@ function pwtw_submit_options()
     echo '</tr>';
     echo '<tr valign="top">';
     echo '<th scope="row">推送内容</th>';
-    echo '<td><textarea  class="all-options"  name="Content" rows="10">'.$option['Content'].'</textarea><p class="description"><p class="description" >预定义变量: {username}作者名称; {title}文章标题; {url}文章链接; 回车为2个&lt;br&gt;或1次Enter; {excerpt}文章摘要</p></td>';
+    echo '<td><textarea  class="all-options"  name="Content" rows="10">'.$option['Content'].'</textarea><p class="description"><p class="description" >预定义变量参考：<a href="https://github.com/sy-records/PushWordPressToWeChat/wiki/%E9%A2%84%E5%AE%9A%E4%B9%89%E5%8F%98%E9%87%8F" target="_blank" rel="nofollow noopener">Github Wiki</a></p></td>';
     echo '</tr>';
     echo '<tr valign="top">';
     echo '<th scope="row">是否默认推送</th>';
