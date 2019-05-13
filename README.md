@@ -8,6 +8,8 @@
 
 ## 何为PushBear
 
+## ‼️ [PushBear推送服务将在五月底下线](http://sc.ftqq.com/3.version)
+
 `PushBear`是@Easy提供的一个基于微信模板的一对多消息送达服务，高效+超高到达
 
 1. 无需注册，直接[扫码登入](http://pushbear.ftqq.com/admin/#/signin)
