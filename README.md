@@ -49,12 +49,6 @@
 
 创建消息通道后就可以看到本通道的订阅二维码，将此二维码给需要订阅的用户关注即可。
 
-这是我的博客订阅二维码，欢迎订阅～
-
-<p align="center">
-<img src="images/showqrcode.jpeg" alt="push-wordpress-to-wechat" align="center" width="200px" />
-</p>
-
 ## Todo
 
 * [x] 可填写配置信息，选择是否默认推送
