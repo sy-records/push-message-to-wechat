@@ -8,7 +8,9 @@
 
 ## 何为PushBear
 
-## ‼️ [PushBear推送服务将在五月底下线](http://sc.ftqq.com/3.version)
+> ‼️ [PushBear推送服务将在五月底下线](http://sc.ftqq.com/3.version)，影响个人推送服务，有认证过的微信服务号不受影响。
+
+> ` PushBear`的第三方平台申请已经通过，就是说你得有一个认证过的服务号，然后授权给`PushBear`，`PushBear`会用你的服务号来生成订阅二维码和推送模板消息。
 
 `PushBear`是@Easy提供的一个基于微信模板的一对多消息送达服务，高效+超高到达
 
