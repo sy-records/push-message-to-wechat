@@ -198,7 +198,11 @@ function pwtw_get_post_first_img($post)
 {
     // 特色图片 优先获取特色缩略图，否则获取文章首图 其他需要手动增加主题相关方法
 
-    if (has_post_thumbnail()) {
+    if ($values = get_post_custom_values("cover")) {
+        //输出自定义域图片地址
+        $values = get_post_custom_values("cover");
+        $src = $values[0];
+    } elseif (has_post_thumbnail()) {
         //如果有特色缩略图，则输出缩略图地址
         $thumbnail_src = wp_get_attachment_image_src(get_post_thumbnail_id($post->ID), 'full');
         $src = $thumbnail_src[0];
@@ -211,9 +215,9 @@ function pwtw_get_post_first_img($post)
     }
 
 //    手动增加主题相关方法
-//    if (empty($src)) {
-//        $src = 替换为主题对应的获取特色图片的方法;
-//    }
+    if (empty($src)) {
+        $src = c7v5_get_post_cover();
+    }
 
     return $src;
 }
