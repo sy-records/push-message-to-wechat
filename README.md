@@ -8,6 +8,10 @@
 
 ## 何为PushBear
 
+> ‼️ [PushBear推送服务将在五月底下线](http://sc.ftqq.com/3.version)，影响个人推送服务，有认证过的微信服务号不受影响。
+
+> ` PushBear`的第三方平台申请已经通过，就是说你得有一个认证过的服务号，然后授权给`PushBear`，`PushBear`会用你的服务号来生成订阅二维码和推送模板消息。
+
 `PushBear`是@Easy提供的一个基于微信模板的一对多消息送达服务，高效+超高到达
 
 1. 无需注册，直接[扫码登入](http://pushbear.ftqq.com/admin/#/signin)
@@ -16,7 +20,7 @@
 
 推送消息存储`72`小时、`5`分钟内不可发布重复消息、普通用户每天`1000`条上限、请勿用于发送广告和有害信息
 
-> 目前`PushBear`暂时停止创建通道，所以如果没有`key`就无法使用。有的无视，直接使用即可。
+> <del>目前`PushBear`暂时停止创建通道，所以如果没有`key`就无法使用。有的无视，直接使用即可。</del>
 
 ## 如何使用
 
@@ -44,12 +48,6 @@
 ## 如何订阅
 
 创建消息通道后就可以看到本通道的订阅二维码，将此二维码给需要订阅的用户关注即可。
-
-这是我的博客订阅二维码，欢迎订阅～
-
-<p align="center">
-<img src="images/showqrcode.jpeg" alt="push-wordpress-to-wechat" align="center" width="200px" />
-</p>
 
 ## Todo
 
