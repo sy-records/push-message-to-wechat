@@ -5,12 +5,11 @@
 <img src="images/push-wordpress-to-wechat.png" alt="push-wordpress-to-wechat" align="center" />
 </p>
 
-
 ## 何为PushBear
 
-> ‼️ [PushBear推送服务将在五月底下线](http://sc.ftqq.com/3.version)，影响个人推送服务，有认证过的微信服务号不受影响。
+> ‼️ [PushBear推送服务将在五月底下线](http://pushbear.ftqq.com)，影响个人推送服务，有认证过的微信公众号不受影响。
 
-> ` PushBear`的第三方平台申请已经通过，就是说你得有一个认证过的服务号，然后授权给`PushBear`，`PushBear`会用你的服务号来生成订阅二维码和推送模板消息。
+> ` PushBear`的第三方平台申请已经通过，就是说你得有一个认证过的公众号，然后授权给`PushBear`，`PushBear`会用你的公众号来生成订阅二维码和推送模板消息。
 
 `PushBear`是@Easy提供的一个基于微信模板的一对多消息送达服务，高效+超高到达
 
@@ -43,7 +42,7 @@
 
 进入插件设置页面后，填入`PushBear`创建消息通道后的`SendKey`，自行选择勾选其他参数
 
-![push-wordpress-to-wechat插件截图](images/pwtw-v1.2.2.png)
+![push-wordpress-to-wechat插件截图](images/screenshot-1.png)
 
 ## 如何订阅
 
