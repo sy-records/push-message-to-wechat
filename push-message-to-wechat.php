@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Push Message To WeChat
-Plugin URI: https://github.com/sy-records/PushMessageToWeChat
+Plugin URI: https://github.com/sy-records/PushWordPressToWeChat
 Description: 基于PushBear服务提供WordPress内容更新微信订阅推送的插件
 Version: 2.0.0
 Author: 沈唁
