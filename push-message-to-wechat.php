@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Push Message To WeChat
-Plugin URI: https://github.com/sy-records/PushWordPressToWeChat
+Plugin URI: https://github.com/sy-records/PushMessageToWeChat
 Description: 基于PushBear服务提供WordPress内容更新微信订阅推送的插件
 Version: 2.0.0
 Author: 沈唁
@@ -48,7 +48,7 @@ function pmtw_post_submit($post_ID, $post)
         // 执行
         if ($status) {
             // 获取选项
-            $option = get_option('PushWordPressToWeChat');
+            $option = get_option('PushMessageToWeChat');
 
             $author_id = $post->post_author;
             $author = get_user_meta($author_id, 'nickname', true);
@@ -240,7 +240,7 @@ function pmtw_submit_create()
 function pmtw_submit_to_publish_metabox()
 {
     //获取选项
-    $option = get_option('PushWordPressToWeChat');
+    $option = get_option('PushMessageToWeChat');
     if ($option['SendKey'] == '') {
         return;
     }
@@ -300,7 +300,7 @@ add_action('admin_init', 'pmtw_submit_default_options');
 function pmtw_submit_default_options()
 {
     // 获取选项
-    $default = get_option('PushWordPressToWeChat');
+    $default = get_option('PushMessageToWeChat');
     if ($default == '') {
         // 设置默认数据
         $default = array(
@@ -311,7 +311,7 @@ function pmtw_submit_default_options()
             'Content' => '',
         );
         //更新选项
-        update_option('PushWordPressToWeChat', $default);
+        update_option('PushMessageToWeChat', $default);
     }
 }
 
@@ -333,9 +333,9 @@ function pmtw_submit_add_links($actions, $plugin_file)
 // stop plugin
 function pmtw_stop_option()
 {
-    $option = get_option('PushWordPressToWeChat');
+    $option = get_option('PushMessageToWeChat');
     if ($option['Delete']) {
-        delete_option("PushWordPressToWeChat");
+        delete_option("PushMessageToWeChat");
     }
 }
 
@@ -365,7 +365,7 @@ function pmtw_submit_options()
             'Content' => sanitize_textarea_field(stripslashes(trim($_POST['Content']))),
         );
 
-        $res = update_option('PushWordPressToWeChat', $pmtwOption);//更新选项
+        $res = update_option('PushMessageToWeChat', $pmtwOption);//更新选项
         if ($res) {
             $updated = '设置成功！';
         } else {
@@ -375,7 +375,7 @@ function pmtw_submit_options()
     }
 
     // 获取选项
-    $option = get_option('PushWordPressToWeChat');
+    $option = get_option('PushMessageToWeChat');
     $default = $option['Default'] !== false ? 'checked="checked"' : '';
     $delete = $option['Delete'] !== false ? 'checked="checked"' : '';
 
