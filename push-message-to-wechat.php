@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Push Message To WeChat
-Plugin URI: https://github.com/sy-records/PushWordPressToWeChat
+Plugin URI: https://github.com/sy-records/push-message-to-wechat
 Description: 基于PushBear服务提供WordPress内容更新微信订阅推送的插件
 Version: 2.0.0
 Author: 沈唁
@@ -398,7 +398,7 @@ function pmtw_submit_options()
     echo '</tr>';
     echo '<tr valign="top">';
     echo '<th scope="row">推送内容</th>';
-    echo '<td><textarea  class="all-options"  name="Content" rows="10">' . $option['Content'] . '</textarea><p class="description"><p class="description" >预定义变量参考：<a href="https://github.com/sy-records/PushWordPressToWeChat/wiki/%E9%A2%84%E5%AE%9A%E4%B9%89%E5%8F%98%E9%87%8F" target="_blank" rel="nofollow noopener">Github Wiki</a></p></td>';
+    echo '<td><textarea  class="all-options"  name="Content" rows="10">' . $option['Content'] . '</textarea><p class="description"><p class="description" >预定义变量参考：<a href="https://github.com/sy-records/push-message-to-wechat/wiki/%E9%A2%84%E5%AE%9A%E4%B9%89%E5%8F%98%E9%87%8F" target="_blank" rel="nofollow noopener">Github Wiki</a></p></td>';
     echo '</tr>';
     echo '<tr valign="top">';
     echo '<th scope="row">是否默认推送</th>';
