@@ -21,7 +21,7 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 * [微信服务号/订阅号](https://mp.weixin.qq.com/)
 * [PushBear](http://pushbear.ftqq.com/)
 
-插件使用帮助查看Github：[PushWordPressToWeChat](https://github.com/sy-records/PushWordPressToWeChat)
+插件使用帮助查看Github：[Push Message To WeChat](https://github.com/sy-records/push-message-to-wechat)
 
 ## 插件特色
 
