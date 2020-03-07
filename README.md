@@ -2,7 +2,7 @@
 
 <p align="center">
 基于 PushBear 服务提供 WordPress 内容更新微信订阅推送的插件
-<img src="push-wordpress-to-wechat.png" alt="push-wordpress-to-wechat" align="center" />
+<img src="push-message-to-wechat.png" alt="push-wordpress-to-wechat" align="center" />
 </p>
 
 ## 何为PushBear

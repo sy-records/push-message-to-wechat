@@ -14,7 +14,7 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
 == Description ==
 
-基于PushBear，推送微信模板消息的一对多消息送达服务，来提供WordPress内容更新微信订阅推送的插件，需要微信认证订阅号/服务号。
+基于PushBear推送微信模板消息的一对多消息送达服务，来提供WordPress内容更新微信订阅推送的插件，需要微信认证订阅号/服务号。
 
 ## 相关依赖：
 
