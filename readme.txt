@@ -4,7 +4,6 @@ Donate link: https://qq52o.me/sponsor.html
 Tags: wechat,push,message,subscribe,pushbear,server
 Requires at least: 4.2
 Tested up to: 5.3.2
-Stable tag: 4.3
 Requires PHP: 5.6.0
 Stable tag: 2.0.0
 License: Apache 2.0
